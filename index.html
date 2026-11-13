@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spotify Clone</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== CONTEXT MENU ===== -->
+<div class="context-menu" id="contextMenu">
+  <div class="ctx-item" onclick="ctxPlay()"><i class="fas fa-play"></i> Play Now</div>
+  <div class="ctx-item" onclick="ctxAddQueue()"><i class="fas fa-list"></i> Add to Queue</div>
+  <div class="ctx-item" onclick="ctxLike()"><i class="fas fa-heart"></i> Like Song</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" onclick="ctxShare()"><i class="fas fa-share-alt"></i> Share</div>
+  <div class="ctx-item" onclick="ctxInfo()"><i class="fas fa-info-circle"></i> Song Info</div>
+</div>
+
+<!-- ===== SLEEP TIMER MODAL ===== -->
+<div class="modal-overlay" id="sleepModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-moon"></i> Sleep Timer</h3>
+      <button class="modal-close" onclick="closeSleepModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Music automatically stop ho jaayegi:</p>
+      <div class="timer-options">
+        <button class="timer-opt" onclick="setSleepTimer(5)">5 min</button>
+        <button class="timer-opt" onclick="setSleepTimer(10)">10 min</button>
+        <button class="timer-opt" onclick="setSleepTimer(15)">15 min</button>
+        <button class="timer-opt" onclick="setSleepTimer(30)">30 min</button>
+        <button class="timer-opt" onclick="setSleepTimer(45)">45 min</button>
+        <button class="timer-opt" onclick="setSleepTimer(60)">60 min</button>
+      </div>
+      <div class="custom-timer">
+        <input type="number" id="customMinutes" placeholder="Custom minutes..." min="1" max="300"/>
+        <button onclick="setCustomTimer()">Set</button>
+      </div>
+      <div id="timerStatus" class="timer-status" style="display:none"></div>
+      <button class="cancel-timer-btn" id="cancelTimerBtn" onclick="cancelSleepTimer()" style="display:none">
+        <i class="fas fa-times-circle"></i> Cancel Timer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SONG INFO MODAL ===== -->
+<div class="modal-overlay" id="infoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-info-circle"></i> Song Info</h3>
+      <button class="modal-close" onclick="closeInfoModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="infoModalBody"></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <svg viewBox="0 0 167 50" class="spotify-logo">
+        <path d="M83.996 0.277C37.747 0.277 0.253 37.77 0.253 84.019c0 46.252 37.494 83.741 83.743 83.741 46.254 0 83.744-37.489 83.744-83.741 0-46.246-37.49-83.738-83.744-83.738v-.004zm38.404 120.78a5.217 5.217 0 01-7.18 1.73c-19.662-12.01-44.414-14.73-73.564-8.07a5.222 5.222 0 01-6.249-3.93 5.213 5.213 0 013.926-6.25c31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-.903-8.148-4.35a6.538 6.538 0 014.354-8.143c30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-.001zm.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219a7.835 7.835 0 015.221-9.771c29.581-8.98 78.756-7.245 109.83 11.202a7.823 7.823 0 012.74 10.733c-2.2 3.722-7.02 4.949-10.73 2.739z"/>
+      </svg>
+    </div>
+
+    <nav class="nav-links">
+      <a href="#" class="nav-item active" onclick="showView('home',this)"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="nav-item" onclick="showView('search',this)"><i class="fas fa-search"></i> Search</a>
+      <a href="#" class="nav-item" onclick="showView('library',this)"><i class="fas fa-book"></i> Your Library</a>
+      <a href="#" class="nav-item" onclick="showView('liked',this)"><i class="fas fa-heart"></i> Liked Songs</a>
+      <a href="#" class="nav-item" onclick="showView('queue',this)"><i class="fas fa-list"></i> Queue</a>
+      <a href="#" class="nav-item" onclick="showView('lyrics',this)"><i class="fas fa-music"></i> Lyrics</a>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="playlist-section">
+      <div class="playlist-header">
+        <span>PLAYLISTS</span>
+        <button class="add-btn" onclick="showToast('Playlist created! 🎵','success')"><i class="fas fa-plus"></i></button>
+      </div>
+      <ul class="playlist-list">
+        <li onclick="playSong(0)">Today's Top Hits</li>
+        <li onclick="playSong(2)">Chill Vibes</li>
+        <li onclick="playSong(4)">Workout Beats</li>
+        <li onclick="playSong(1)">Late Night Drive</li>
+        <li onclick="playSong(5)">Indian Hits 🎵</li>
+        <li onclick="playSong(3)">Bollywood Classics</li>
+        <li onclick="playSong(6)">Party Starters</li>
+      </ul>
+    </div>
+
+    <!-- Theme + Timer -->
+    <div class="sidebar-bottom">
+      <button class="sidebar-tool-btn" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-moon" id="themeIcon"></i> <span id="themeLabel">Dark Mode</span>
+      </button>
+      <button class="sidebar-tool-btn" onclick="openSleepModal()" title="Sleep Timer">
+        <i class="fas fa-moon"></i> Sleep Timer
+        <span class="timer-badge" id="timerBadge" style="display:none"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="nav-arrows">
+        <button class="arrow-btn" onclick="history.back()"><i class="fas fa-chevron-left"></i></button>
+        <button class="arrow-btn" onclick="history.forward()"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="search-bar" id="searchBarWrap">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search songs, artists, albums..." oninput="handleSearch(this.value)" onfocus="showView('search', document.querySelector('[data-view=search]'))"/>
+      </div>
+      <div class="topbar-right">
+        <button class="signup-btn">Sign Up</button>
+      </div>
+    </div>
+
+    <!-- ===== HOME VIEW ===== -->
+    <div class="view active" id="homeView">
+      <div class="banner">
+        <div class="banner-text">
+          <p class="banner-sub">🎵 Featured Playlist</p>
+          <h1 class="banner-title">Good Evening 🌙</h1>
+          <p class="banner-desc">The hottest tracks right now. Enjoy!</p>
+          <div class="banner-btns">
+            <button class="play-featured-btn" onclick="playSong(0)">
+              <i class="fas fa-play"></i> Play All
+            </button>
+            <button class="outline-btn" onclick="showView('liked', document.querySelector('[data-view=liked]'))">
+              <i class="fas fa-heart"></i> Liked Songs
+            </button>
+          </div>
+        </div>
+        <img src="https://picsum.photos/seed/banner/420/230" class="banner-img" alt="banner"/>
+      </div>
+
+      <div class="section-title">Quick Picks</div>
+      <div class="cards-grid" id="homeCards"></div>
+
+      <div class="section-title" style="margin-top:28px">
+        Popular Songs
+        <button class="see-all-btn" onclick="showView('library',document.querySelector('[data-view=library]'))">See all</button>
+      </div>
+      <table class="songs-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Title</th><th>Album</th><th><i class="fas fa-clock"></i></th>
+          </tr>
+        </thead>
+        <tbody id="homeSongList"></tbody>
+      </table>
+    </div>
+
+    <!-- ===== SEARCH VIEW ===== -->
+    <div class="view" id="searchView" data-view="search">
+      <div class="view-header">
+        <h2>Search</h2>
+      </div>
+      <div id="searchResults">
+        <div class="search-hint">
+          <i class="fas fa-search fa-3x"></i>
+          <p>Search karo koi bhi song, artist ya album!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LIBRARY VIEW ===== -->
+    <div class="view" id="libraryView" data-view="library">
+      <div class="view-header">
+        <h2>Your Library</h2>
+        <span class="song-count" id="libCount"></span>
+      </div>
+      <table class="songs-table">
+        <thead>
+          <tr><th>#</th><th>Title</th><th>Album</th><th><i class="fas fa-clock"></i></th></tr>
+        </thead>
+        <tbody id="librarySongList"></tbody>
+      </table>
+    </div>
+
+    <!-- ===== LIKED SONGS VIEW ===== -->
+    <div class="view" id="likedView" data-view="liked">
+      <div class="liked-header">
+        <div class="liked-icon"><i class="fas fa-heart"></i></div>
+        <div>
+          <p class="liked-label">PLAYLIST</p>
+          <h2 class="liked-title">Liked Songs</h2>
+          <p class="liked-count" id="likedCount">0 songs</p>
+        </div>
+      </div>
+      <div class="liked-actions">
+        <button class="play-featured-btn" onclick="playLiked()">
+          <i class="fas fa-play"></i> Play
+        </button>
+        <button class="outline-btn" onclick="shuffleLiked()">
+          <i class="fas fa-random"></i> Shuffle
+        </button>
+      </div>
+      <table class="songs-table" id="likedTableWrap">
+        <thead>
+          <tr><th>#</th><th>Title</th><th>Album</th><th><i class="fas fa-clock"></i></th></tr>
+        </thead>
+        <tbody id="likedSongList"></tbody>
+      </table>
+      <div class="empty-state" id="likedEmpty">
+        <i class="fas fa-heart fa-3x"></i>
+        <p>Koi liked song nahi hai!</p>
+        <p class="sub">Songs pe ❤️ click karke yahan save karo.</p>
+      </div>
+    </div>
+
+    <!-- ===== QUEUE VIEW ===== -->
+    <div class="view" id="queueView" data-view="queue">
+      <div class="view-header">
+        <h2><i class="fas fa-list"></i> Queue</h2>
+        <button class="outline-btn sm" onclick="clearQueue()"><i class="fas fa-trash"></i> Clear</button>
+      </div>
+      <div class="queue-section">
+        <h4 class="queue-label">Now Playing</h4>
+        <div id="queueNowPlaying"></div>
+        <h4 class="queue-label" style="margin-top:20px">Next Up</h4>
+        <div id="queueList"></div>
+        <div class="empty-state" id="queueEmpty" style="display:none">
+          <i class="fas fa-list fa-3x"></i>
+          <p>Queue khali hai!</p>
+          <p class="sub">Songs add karo right-click karke.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LYRICS VIEW ===== -->
+    <div class="view" id="lyricsView" data-view="lyrics">
+      <div class="lyrics-container">
+        <div class="lyrics-song-info">
+          <img id="lyricsCover" src="" alt="" class="lyrics-cover"/>
+          <div>
+            <h2 id="lyricsTitle">Select a song</h2>
+            <p id="lyricsArtist" class="lyrics-artist"></p>
+          </div>
+        </div>
+        <div class="lyrics-box" id="lyricsBox">
+          <p class="lyrics-hint">Song play karo lyrics dekhne ke liye 🎵</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== PLAYER ===== -->
+<footer class="player">
+  <!-- Left -->
+  <div class="player-left">
+    <img id="playerCover" src="https://picsum.photos/seed/song1/60/60" alt="cover" class="player-cover"/>
+    <div class="player-info">
+      <span id="playerTitle" class="player-title">Select a Song</span>
+      <span id="playerArtist" class="player-artist">Artist</span>
+    </div>
+    <button class="like-btn" id="likeBtn" onclick="toggleLike()"><i class="far fa-heart"></i></button>
+    <button class="like-btn" onclick="showView('lyrics',document.querySelector('[data-view=lyrics]'))" title="Show Lyrics"><i class="fas fa-align-left"></i></button>
+  </div>
+
+  <!-- Center -->
+  <div class="player-center">
+    <div class="controls">
+      <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle"><i class="fas fa-random"></i></button>
+      <button class="ctrl-btn" onclick="prevSong()" title="Previous"><i class="fas fa-step-backward"></i></button>
+      <button class="play-pause-btn" id="playPauseBtn" onclick="togglePlay()">
+        <i class="fas fa-play" id="playIcon"></i>
+      </button>
+      <button class="ctrl-btn" onclick="nextSong()" title="Next"><i class="fas fa-step-forward"></i></button>
+      <button class="ctrl-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat"><i class="fas fa-redo"></i></button>
+    </div>
+    <div class="progress-container">
+      <span id="currentTime" class="time">0:00</span>
+      <div class="progress-bar-wrap" id="progressWrap" onclick="seekClick(event)">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+      <span id="totalTime" class="time">0:00</span>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="player-right">
+    <!-- Visualizer -->
+    <canvas id="visualizer" width="80" height="40"></canvas>
+    <button class="ctrl-btn" onclick="toggleMute()" title="Mute"><i class="fas fa-volume-up" id="volumeIcon"></i></button>
+    <div class="volume-wrap">
+      <input type="range" id="volumeBar" min="0" max="100" value="70" oninput="changeVolume(this.value)"/>
+    </div>
+    <button class="ctrl-btn" onclick="openSleepModal()" title="Sleep Timer" id="sleepTimerBtn">
+      <i class="fas fa-moon"></i>
+    </button>
+    <button class="ctrl-btn" onclick="showView('queue',document.querySelector('[data-view=queue]'))" title="Queue">
+      <i class="fas fa-list"></i>
+    </button>
+  </div>
+</footer>
+
+<audio id="audioPlayer"></audio>
+<script src="script.js"></script>
+</body>
+</html>
