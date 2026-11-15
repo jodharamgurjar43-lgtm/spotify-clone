@@ -153,6 +153,7 @@ function renderAll() {
   renderLiked();
   renderQueue();
   renderHomeCards();
+  renderRetroCards();
 }
 
 function renderLibrary() {
