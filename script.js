@@ -71,6 +71,29 @@ function showView(viewName, navEl) {
 /* ===========================
    RENDER FUNCTIONS
 =========================== */
+
+function renderRetroCards() {
+  const grid = document.getElementById("retroCards");
+  if (!grid) return;
+  grid.innerHTML = "";
+  const retroSongs = songs.filter(s => s.id >= 10);
+  retroSongs.forEach((song) => {
+    const globalIdx = songs.findIndex(x => x.id === song.id);
+    const card = document.createElement("div");
+    card.className = "playlist-card";
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <img src="${song.cover}" alt="${song.title}"/>
+        <button class="card-play-btn" onclick="event.stopPropagation();playSong(${globalIdx})"><i class="fas fa-play"></i></button>
+      </div>
+      <p class="card-name">${song.title}</p>
+      <p class="card-desc">${song.artist}</p>
+    `;
+    card.onclick = () => playSong(globalIdx);
+    grid.appendChild(card);
+  });
+}
+
 function renderHomeCards() {
   const grid = document.getElementById("homeCards");
   grid.innerHTML = "";
